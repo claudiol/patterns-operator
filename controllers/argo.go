@@ -253,7 +253,7 @@ func newMultiSourceApplication(p api.Pattern) *argoapi.Application {
 		RepoURL:        p.Spec.GitConfig.TargetRepo,
 		Path:           "/",
 		TargetRevision: p.Spec.GitConfig.TargetRevision,
-		Ref:            "$values",
+		Ref:            "values",
 	}
 
 	sources = append(sources, *valuesSource)
@@ -388,8 +388,13 @@ func compareSource(goal, actual *argoapi.ApplicationSource) bool {
 
 }
 
-func compareSources(goal, actual *argoapi.ApplicationSources) bool {
-	return false
+func compareSources(goal, actual argoapi.ApplicationSources) bool {
+	for i, v := range actual {
+		if compareSource(&v, &goal[i]) == false {
+			return false
+		}
+	}
+	return true
 }
 
 func compareHelmSource(goal, actual argoapi.ApplicationSourceHelm) bool {

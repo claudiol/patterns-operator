@@ -385,7 +385,7 @@ func (r *PatternReconciler) applyDefaults(input *api.Pattern) (error, *api.Patte
 		output.Spec.GitConfig.MultiSourceRepoChart = "clustergroup"
 	}
 	if len(output.Spec.GitConfig.MultiSourceTargetRevision) == 0 {
-		output.Spec.GitConfig.MultiSourceTargetRevision = "0.0.1"
+		output.Spec.GitConfig.MultiSourceTargetRevision = "pattern-clustergroup-0.0.1"
 	}
 
 	// interval cannot be less than 180 seconds to avoid drowning the API server in requests
