@@ -262,7 +262,7 @@ func newMultiSourceApplication(p api.Pattern) *argoapi.Application {
 	// root := filepath.Join(os.TempDir(), r.ReplaceAllString(NormalizeGitURL(rawRepoURL), "_"))
 
 	spec := argoapi.ApplicationSpec{
-		// Source is a reference to the location of the application's manifests or chart
+		// Sources is used since we have multiple sources here
 		Sources: sources,
 		Destination: argoapi.ApplicationDestination{
 			Name:      "in-cluster",
@@ -346,9 +346,14 @@ func updateApplication(client argoclient.Interface, target, current *argoapi.App
 	} else if target == nil {
 		return fmt.Errorf("target application was nil"), false
 	}
-
-	if compareSource(target.Spec.Source, current.Spec.Source) {
-		return nil, false
+	if current.Spec.Sources == nil {
+		if compareSource(target.Spec.Source, current.Spec.Source) {
+			return nil, false
+		}
+	} else {
+		if compareSources(target.Spec.Sources, current.Spec.Sources) {
+			return nil, false
+		}
 	}
 
 	spec := current.Spec.DeepCopy()
@@ -382,6 +387,11 @@ func compareSource(goal, actual *argoapi.ApplicationSource) bool {
 	return compareHelmSource(*goal.Helm, *actual.Helm)
 
 }
+
+func compareSources(goal, actual *argoapi.ApplicationSources) bool {
+	return false
+}
+
 func compareHelmSource(goal, actual argoapi.ApplicationSourceHelm) bool {
 	if !compareHelmValueFiles(goal.ValueFiles, actual.ValueFiles) {
 		return false
