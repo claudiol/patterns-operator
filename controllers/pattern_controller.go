@@ -382,10 +382,10 @@ func (r *PatternReconciler) applyDefaults(input *api.Pattern) (error, *api.Patte
 		output.Spec.GitConfig.MultiSourceRepoUrl = "https://mbaldessari.github.io/vp-helm-charts/"
 	}
 	if len(output.Spec.GitConfig.MultiSourceRepoChart) == 0 {
-		output.Spec.GitConfig.MultiSourceRepoChart = "clustergroup"
+		output.Spec.GitConfig.MultiSourceRepoChart = "pattern-clustergroup"
 	}
 	if len(output.Spec.GitConfig.MultiSourceTargetRevision) == 0 {
-		output.Spec.GitConfig.MultiSourceTargetRevision = "pattern-clustergroup-0.0.1"
+		output.Spec.GitConfig.MultiSourceTargetRevision = "0.0.1"
 	}
 
 	// interval cannot be less than 180 seconds to avoid drowning the API server in requests
