@@ -207,8 +207,13 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	logOnce("namespace found")
 
+	targetApp := &argoapi.Application{}
 	// -- ArgoCD Application
-	targetApp := newApplication(*qualifiedInstance)
+	if gitConfig.MultiSourceSupport {
+		targetApp = newMultiSourceApplication(*qualifiedInstance)
+	} else {
+		targetApp = newApplication(*qualifiedInstance)
+	}
 	_ = controllerutil.SetOwnerReference(qualifiedInstance, targetApp, r.Scheme)
 
 	//log.Printf("Targeting: %s\n", objectYaml(targetApp))
@@ -372,6 +377,15 @@ func (r *PatternReconciler) applyDefaults(input *api.Pattern) (error, *api.Patte
 	}
 	if len(output.Spec.ClusterGroupName) == 0 {
 		output.Spec.ClusterGroupName = "default"
+	}
+	if len(output.Spec.GitConfig.MultiSourceRepoUrl) == 0 {
+		output.Spec.GitConfig.MultiSourceRepoUrl = "https://mbaldessari.github.io/vp-helm-charts/"
+	}
+	if len(output.Spec.GitConfig.MultiSourceRepoChart) == 0 {
+		output.Spec.GitConfig.MultiSourceRepoChart = "clustergroup"
+	}
+	if len(output.Spec.GitConfig.MultiSourceTargetRevision) == 0 {
+		output.Spec.GitConfig.MultiSourceTargetRevision = "0.0.1"
 	}
 
 	// interval cannot be less than 180 seconds to avoid drowning the API server in requests

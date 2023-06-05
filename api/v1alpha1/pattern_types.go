@@ -101,6 +101,24 @@ type GitConfig struct {
 	// Branch, tag, or commit to deploy.  Does not support short-sha's. Default: HEAD
 	//+operator-sdk:csv:customresourcedefinitions:type=spec
 	TargetRevision string `json:"targetRevision,omitempty"`
+
+	//Enable multiSourceSupport when deploying the clustergroup argo application
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default:=false
+	MultiSourceSupport bool `json:"multiSourceSupport,omitempty"`
+
+	// The url multiSourceRepoURL when deploying the clustergroup argo application
+	// Defaults to https://mbaldessari.github.io/vp-helm-charts/
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	MultiSourceRepoUrl string `json:"multiSourceRepoUrl,omitempty"`
+
+	// The chart inside the repo to target for installation. Defaults to 'clustergroup'
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	MultiSourceRepoChart string `json:"multiSourceRepoChart,omitempty"`
+
+	//Enable multiSourceRepoURL when deploying the clustergroup argo application
+	//+operator-sdk:csv:customresourcedefinitions:type=spec
+	MultiSourceTargetRevision string `json:"multiSourceTargetRevision,omitempty"`
 }
 
 type ApplyChangeType string

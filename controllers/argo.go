@@ -95,16 +95,15 @@ func newApplicationParameters(p api.Pattern) []argoapi.HelmParameter {
 	return parameters
 }
 
-func newApplicationValueFiles(p api.Pattern) []string {
-
+func newApplicationValueFiles(p api.Pattern, prefix string) []string {
 	files := []string{
-		"/values-global.yaml",
-		fmt.Sprintf("/values-%s.yaml", p.Spec.ClusterGroupName),
-		fmt.Sprintf("/values-%s.yaml", p.Status.ClusterPlatform),
-		fmt.Sprintf("/values-%s-%s.yaml", p.Status.ClusterPlatform, p.Status.ClusterVersion),
-		fmt.Sprintf("/values-%s-%s.yaml", p.Status.ClusterPlatform, p.Spec.ClusterGroupName),
-		fmt.Sprintf("/values-%s-%s.yaml", p.Status.ClusterVersion, p.Spec.ClusterGroupName),
-		fmt.Sprintf("/values-%s.yaml", p.Status.ClusterName),
+		fmt.Sprintf("%s/values-global.yaml", prefix),
+		fmt.Sprintf("%s/values-%s.yaml", prefix, p.Spec.ClusterGroupName),
+		fmt.Sprintf("%s/values-%s.yaml", prefix, p.Status.ClusterPlatform),
+		fmt.Sprintf("%s/values-%s-%s.yaml", prefix, p.Status.ClusterPlatform, p.Status.ClusterVersion),
+		fmt.Sprintf("%s/values-%s-%s.yaml", prefix, p.Status.ClusterPlatform, p.Spec.ClusterGroupName),
+		fmt.Sprintf("%s/values-%s-%s.yaml", prefix, p.Status.ClusterVersion, p.Spec.ClusterGroupName),
+		fmt.Sprintf("%s/values-%s.yaml", prefix, p.Status.ClusterName),
 	}
 
 	for _, extra := range p.Spec.ExtraValueFiles {
@@ -124,20 +123,18 @@ func newApplicationValues(p api.Pattern) string {
 }
 
 func newApplication(p api.Pattern) *argoapi.Application {
-
 	// Argo uses...
 	// r := regexp.MustCompile("(/|:)")
 	// root := filepath.Join(os.TempDir(), r.ReplaceAllString(NormalizeGitURL(rawRepoURL), "_"))
 
 	spec := argoapi.ApplicationSpec{
-
 		// Source is a reference to the location of the application's manifests or chart
 		Source: &argoapi.ApplicationSource{
 			RepoURL:        p.Spec.GitConfig.TargetRepo,
 			Path:           "common/clustergroup",
 			TargetRevision: p.Spec.GitConfig.TargetRevision,
 			Helm: &argoapi.ApplicationSourceHelm{
-				ValueFiles: newApplicationValueFiles(p),
+				ValueFiles: newApplicationValueFiles(p, ""),
 
 				// Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
 				Parameters: newApplicationParameters(p),
@@ -217,7 +214,110 @@ func newApplication(p api.Pattern) *argoapi.Application {
 
 	controllerutil.AddFinalizer(&app, argoapi.ForegroundPropagationPolicyFinalizer)
 	return &app
+}
 
+func newMultiSourceApplication(p api.Pattern) *argoapi.Application {
+	sources := []argoapi.ApplicationSource{}
+
+	baseSource := &argoapi.ApplicationSource{
+		RepoURL:        p.Spec.GitConfig.MultiSourceRepoUrl,
+		Chart:          p.Spec.GitConfig.MultiSourceRepoChart,
+		TargetRevision: p.Spec.GitConfig.MultiSourceTargetRevision,
+		Helm: &argoapi.ApplicationSourceHelm{
+			ValueFiles: newApplicationValueFiles(p, "$values"),
+
+			// Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
+			Parameters: newApplicationParameters(p),
+
+			// This is to be able to pass down the extraParams to the single applications
+			Values: newApplicationValues(p),
+			// ReleaseName is the Helm release name to use. If omitted it will use the application name
+			// ReleaseName string `json:"releaseName,omitempty" protobuf:"bytes,3,opt,name=releaseName"`
+			// Values specifies Helm values to be passed to helm template, typically defined as a block
+			// Values string `json:"values,omitempty" protobuf:"bytes,4,opt,name=values"`
+			// FileParameters are file parameters to the helm template
+			// FileParameters []HelmFileParameter `json:"fileParameters,omitempty" protobuf:"bytes,5,opt,name=fileParameters"`
+			// Version is the Helm version to use for templating (either "2" or "3")
+			// Version string `json:"version,omitempty" protobuf:"bytes,6,opt,name=version"`
+			// PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+			// PassCredentials bool `json:"passCredentials,omitempty" protobuf:"bytes,7,opt,name=passCredentials"`
+			// IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
+			// Only applies to local files
+			IgnoreMissingValueFiles: true,
+			// SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+			// SkipCrds bool `json:"skipCrds,omitempty" protobuf:"bytes,9,opt,name=skipCrds"`
+		},
+	}
+	sources = append(sources, *baseSource)
+	valuesSource := &argoapi.ApplicationSource{
+		RepoURL:        p.Spec.GitConfig.TargetRepo,
+		Path:           "/",
+		TargetRevision: p.Spec.GitConfig.TargetRevision,
+		Ref:            "$values",
+	}
+
+	sources = append(sources, *valuesSource)
+	// Argo uses...
+	// r := regexp.MustCompile("(/|:)")
+	// root := filepath.Join(os.TempDir(), r.ReplaceAllString(NormalizeGitURL(rawRepoURL), "_"))
+
+	spec := argoapi.ApplicationSpec{
+		// Source is a reference to the location of the application's manifests or chart
+		Sources: sources,
+		Destination: argoapi.ApplicationDestination{
+			Name:      "in-cluster",
+			Namespace: p.Namespace,
+		},
+		// Project is a reference to the project this application belongs to.
+		// The empty string means that application belongs to the 'default' project.
+		Project: "default",
+
+		// IgnoreDifferences is a list of resources and their fields which should be ignored during comparison
+		// IgnoreDifferences []ResourceIgnoreDifferences `json:"ignoreDifferences,omitempty" protobuf:"bytes,5,name=ignoreDifferences"`
+		// Info contains a list of information (URLs, email addresses, and plain text) that relates to the application
+		// Info []Info `json:"info,omitempty" protobuf:"bytes,6,name=info"`
+		// RevisionHistoryLimit limits the number of items kept in the application's revision history, which is used for informational purposes as well as for rollbacks to previous versions.
+		// This should only be changed in exceptional circumstances.
+		// Setting to zero will store no history. This will reduce storage used.
+		// Increasing will increase the space used to store the history, so we do not recommend increasing it.
+		// Default is 10.
+		// RevisionHistoryLimit *int64 `json:"revisionHistoryLimit,omitempty" protobuf:"bytes,7,name=revisionHistoryLimit"`
+	}
+
+	if !p.ObjectMeta.DeletionTimestamp.IsZero() {
+		spec.SyncPolicy = &argoapi.SyncPolicy{
+			// Automated will keep an application synced to the target revision
+			Automated: &argoapi.SyncPolicyAutomated{
+				Prune: true,
+			},
+			// Options allow you to specify whole app sync-SyncOptions
+			SyncOptions: []string{"Prune=true"},
+		}
+
+	} else if !p.Spec.GitOpsConfig.ManualSync {
+		// SyncPolicy controls when and how a sync will be performed
+		spec.SyncPolicy = &argoapi.SyncPolicy{
+			// Automated will keep an application synced to the target revision
+			Automated: &argoapi.SyncPolicyAutomated{},
+			// Options allow you to specify whole app sync-options
+			SyncOptions: []string{},
+			// Retry controls failed sync retry behavior
+			// Retry *RetryStrategy `json:"retry,omitempty" protobuf:"bytes,3,opt,name=retry"`
+		}
+	}
+	labels := make(map[string]string)
+	labels["pattern"] = applicationName(p)
+	app := argoapi.Application{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      applicationName(p),
+			Namespace: applicationNamespace,
+			Labels:    labels,
+		},
+		Spec: spec,
+	}
+
+	controllerutil.AddFinalizer(&app, argoapi.ForegroundPropagationPolicyFinalizer)
+	return &app
 }
 
 func applicationName(p api.Pattern) string {
