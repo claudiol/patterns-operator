@@ -251,7 +251,6 @@ func newMultiSourceApplication(p api.Pattern) *argoapi.Application {
 	sources = append(sources, *baseSource)
 	valuesSource := &argoapi.ApplicationSource{
 		RepoURL:        p.Spec.GitConfig.TargetRepo,
-		Path:           "/",
 		TargetRevision: p.Spec.GitConfig.TargetRevision,
 		Ref:            "values",
 	}
