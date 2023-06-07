@@ -13,6 +13,7 @@ metadata:
           "spec": {
             "clusterGroupName": "hub",
             "gitSpec": {
+              "multiSourceSupport": true,
               "targetRepo": "https://github.com/hybrid-cloud-patterns/multicloud-gitops",
               "targetRevision": "main"
             }
@@ -21,13 +22,13 @@ metadata:
       ]
     capabilities: Basic Install
     categories: OpenShift Optional
-    containerImage: quay.io/hybridcloudpatterns/patterns-operator:0.0.16
-    createdAt: 2023-06-05 18:04:40
+    containerImage: quay.io/rhn_support_mbaldess/patterns-operator:6.6.6
+    createdAt: 2023-06-06 15:32:09
     description: An operator to deploy and manage architecture patterns from https://hybrid-cloud-patterns.io
     operators.operatorframework.io/builder: operator-sdk-v1.28.1
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     repository: https://github.com/hybrid-cloud-patterns/patterns-operator
-  name: patterns-operator.v0.0.16
+  name: patterns-operator.v6.6.6
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -288,7 +289,7 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
-                image: quay.io/hybridcloudpatterns/patterns-operator:0.0.16
+                image: quay.io/rhn_support_mbaldess/patterns-operator:6.6.6
                 imagePullPolicy: IfNotPresent
                 livenessProbe:
                   httpGet:
@@ -375,4 +376,4 @@ spec:
   provider:
     name: Red Hat
     url: https://www.redhat.com/en/products/edge/validated-patterns
-  version: 0.0.16
+  version: 6.6.6
