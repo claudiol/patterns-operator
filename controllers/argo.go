@@ -368,6 +368,9 @@ func removeApplication(client argoclient.Interface, name string) error {
 }
 
 func compareSource(goal, actual *argoapi.ApplicationSource) bool {
+    if goal == nil || actual == nil {
+        return false
+    }
 	if goal.RepoURL != actual.RepoURL {
 		log.Printf("RepoURL changed %s -> %s\n", actual.RepoURL, goal.RepoURL)
 		return false
