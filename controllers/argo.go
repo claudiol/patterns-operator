@@ -388,7 +388,13 @@ func compareSource(goal, actual *argoapi.ApplicationSource) bool {
 }
 
 func compareSources(goal, actual argoapi.ApplicationSources) bool {
+    if actual == nil || goal == nil {
+        return false 
+    }
     if len(actual) != len(goal) {
+        return false
+    }
+    if len(actual) == 0 || len(goal) == 0 {
         return false
     }
 	for i, v := range actual {
