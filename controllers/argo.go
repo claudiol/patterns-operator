@@ -385,6 +385,9 @@ func compareSource(goal, actual *argoapi.ApplicationSource) bool {
 		log.Printf("Path changed %s -> %s\n", actual.Path, goal.Path)
 		return false
 	}
+    if goal.Helm == nil || actual.Helm == nil {
+        return false
+    }
 
 	return compareHelmSource(*goal.Helm, *actual.Helm)
 
@@ -400,8 +403,9 @@ func compareSources(goal, actual argoapi.ApplicationSources) bool {
     if len(actual) == 0 || len(goal) == 0 {
         return false
     }
-	for i, v := range actual {
-        value := v
+	for i := range actual {
+        // avoids memory aliasing
+        value := actual[i]
         if &value == nil || &goal[i] == nil {
             return false
         }
