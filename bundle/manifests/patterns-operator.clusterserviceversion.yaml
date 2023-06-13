@@ -23,7 +23,7 @@ metadata:
     capabilities: Basic Install
     categories: OpenShift Optional
     containerImage: quay.io/rhn_support_mbaldess/patterns-operator:6.6.6
-    createdAt: 2023-06-13 17:50:06
+    createdAt: 2023-06-13 18:24:01
     description: An operator to deploy and manage architecture patterns from https://hybrid-cloud-patterns.io
     operators.operatorframework.io/builder: operator-sdk-v1.28.1
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3

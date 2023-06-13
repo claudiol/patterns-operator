@@ -406,9 +406,6 @@ func compareSources(goal, actual argoapi.ApplicationSources) bool {
 	for i := range actual {
         // avoids memory aliasing
         value := actual[i]
-        if &value == nil || &goal[i] == nil {
-            return false
-        }
 		if !compareSource(&value, &goal[i]) {
 			return false
 		}
