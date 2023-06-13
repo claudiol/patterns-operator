@@ -401,10 +401,11 @@ func compareSources(goal, actual argoapi.ApplicationSources) bool {
         return false
     }
 	for i, v := range actual {
-        if &v == nil || &goal[i] == nil {
+        value := v
+        if &value == nil || &goal[i] == nil {
             return false
         }
-		if !compareSource(&v, &goal[i]) {
+		if !compareSource(&value, &goal[i]) {
 			return false
 		}
 	}
