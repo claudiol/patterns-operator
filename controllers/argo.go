@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -73,6 +74,10 @@ func newApplicationParameters(p api.Pattern) []argoapi.HelmParameter {
 		{
 			Name:  "global.localClusterName",
 			Value: p.Status.ClusterName,
+		},
+		{
+			Name:  "global.multiSourceSupport",
+			Value: strconv.FormatBool(p.Spec.GitConfig.MultiSourceSupport),
 		},
 	}
 
@@ -368,9 +373,9 @@ func removeApplication(client argoclient.Interface, name string) error {
 }
 
 func compareSource(goal, actual *argoapi.ApplicationSource) bool {
-    if goal == nil || actual == nil {
-        return false
-    }
+	if goal == nil || actual == nil {
+		return false
+	}
 	if goal.RepoURL != actual.RepoURL {
 		log.Printf("RepoURL changed %s -> %s\n", actual.RepoURL, goal.RepoURL)
 		return false
@@ -385,27 +390,27 @@ func compareSource(goal, actual *argoapi.ApplicationSource) bool {
 		log.Printf("Path changed %s -> %s\n", actual.Path, goal.Path)
 		return false
 	}
-    if goal.Helm == nil || actual.Helm == nil {
-        return false
-    }
+	if goal.Helm == nil || actual.Helm == nil {
+		return false
+	}
 
 	return compareHelmSource(*goal.Helm, *actual.Helm)
 
 }
 
 func compareSources(goal, actual argoapi.ApplicationSources) bool {
-    if actual == nil || goal == nil {
-        return false 
-    }
-    if len(actual) != len(goal) {
-        return false
-    }
-    if len(actual) == 0 || len(goal) == 0 {
-        return false
-    }
+	if actual == nil || goal == nil {
+		return false
+	}
+	if len(actual) != len(goal) {
+		return false
+	}
+	if len(actual) == 0 || len(goal) == 0 {
+		return false
+	}
 	for i := range actual {
-        // avoids memory aliasing
-        value := actual[i]
+		// avoids memory aliasing
+		value := actual[i]
 		if !compareSource(&value, &goal[i]) {
 			return false
 		}
