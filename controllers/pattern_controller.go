@@ -319,14 +319,18 @@ func (r *PatternReconciler) applyDefaults(input *api.Pattern) (error, *api.Patte
 
 	// Cluster Version
 	// oc get OpenShiftControllerManager/cluster -o jsonpath='{.status.version}'
-	clusterVersion, err := r.operatorClient.OpenShiftControllerManagers().Get(context.Background(), "cluster", metav1.GetOptions{})
+	//clusterVersion, err := r.operatorClient.OpenShiftControllerManagers().Get(context.Background(), "cluster", metav1.GetOptions{})
+	// oc get clusterversion -o jsonpath='{.items[].status.desired.version}'
+	clusterVersion, err := r.configClient.ConfigV1().ClusterVersions().Get(context.Background(), "version", metav1.GetOptions{})
 	if err != nil {
+		log.Printf("ClusterVersion ERROR")
 		return err, output
 	} else {
 		// status:
 		//   ...
 		//   version: 4.10.32
-		v, version_err := semver.NewVersion(string(clusterVersion.Status.Version))
+		//v, version_err := semver.NewVersion(string(clusterVersion.Status.Version))
+		v, version_err := semver.NewVersion(string(clusterVersion.Status.Desired.Version))
 		if version_err != nil {
 			return version_err, output
 		}
