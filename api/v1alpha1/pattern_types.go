@@ -193,6 +193,12 @@ type PatternList struct {
 	Items           []Pattern `json:"items"`
 }
 
+type PatternApplicationConditions struct {
+	Name            string `json:"name,omitempty"`
+	AppSyncStatus   string `json:"syncStatus,omitempty"`
+	AppHealthStatus string `json:"healthStatus,omitempty"`
+}
+
 type PatternCondition struct {
 	// Type of deployment condition.
 	Type PatternConditionType `json:"type"`
@@ -204,6 +210,8 @@ type PatternCondition struct {
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
 	// A human readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
+	// A human readable status for the pattern applications
+	Applications []PatternApplicationConditions `json:"applications,omitempty"`
 }
 
 type PatternConditionType string
@@ -211,6 +219,13 @@ type PatternConditionType string
 const (
 	GitOutOfSync PatternConditionType = "GitOutOfSync"
 	GitInSync    PatternConditionType = "GitInSync"
+	Synced       PatternConditionType = "Synced"
+	OutOfSync    PatternConditionType = "OutOfSync"
+	Unknown      PatternConditionType = "Unknown"
+	Degraded     PatternConditionType = "Degraded"
+	Progressing  PatternConditionType = "Progressing"
+	Missing      PatternConditionType = "Missing"
+	Suspended    PatternConditionType = "Suspended"
 )
 
 func init() {

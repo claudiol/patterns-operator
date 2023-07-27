@@ -144,6 +144,18 @@ spec:
               conditions:
                 items:
                   properties:
+                    applications:
+                      description: A human readable status for the pattern applications
+                      items:
+                        properties:
+                          healthStatus:
+                            type: string
+                          name:
+                            type: string
+                          syncStatus:
+                            type: string
+                        type: object
+                      type: array
                     lastTransitionTime:
                       description: Last time the condition transitioned from one status
                         to another.
