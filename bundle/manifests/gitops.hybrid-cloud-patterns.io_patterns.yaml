@@ -131,6 +131,19 @@ spec:
             properties:
               appClusterDomain:
                 type: string
+              applications:
+                items:
+                  properties:
+                    healthMessage:
+                      type: string
+                    healthStatus:
+                      type: string
+                    name:
+                      type: string
+                    syncStatus:
+                      type: string
+                  type: object
+                type: array
               clusterDomain:
                 type: string
               clusterID:

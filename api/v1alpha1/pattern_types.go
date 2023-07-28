@@ -134,6 +134,13 @@ type GitOpsConfig struct {
 	UseCSV bool `json:"useCSV,omitempty"`
 }
 
+type PatternApplicationInfo struct {
+	Name             string `json:"name,omitempty"`
+	AppSyncStatus    string `json:"syncStatus,omitempty"`
+	AppHealthStatus  string `json:"healthStatus,omitempty"`
+	AppHealthMessage string `json:"healthMessage,omitempty"`
+}
+
 // PatternStatus defines the observed state of Pattern
 type PatternStatus struct {
 	// Observed state of the pattern
@@ -164,6 +171,8 @@ type PatternStatus struct {
 	ClusterVersion string `json:"clusterVersion,omitempty"`
 	//+operator-sdk:csv:customerresourcedefinitions:type=conditions
 	Conditions []PatternCondition `json:"conditions,omitempty"`
+	//+operator-sdk:csv:customerresourcedefinitions:type=status
+	Applications []PatternApplicationInfo `json:"applications,omitempty"`
 }
 
 // See: https://book.kubebuilder.io/reference/markers/crd.html
@@ -193,12 +202,6 @@ type PatternList struct {
 	Items           []Pattern `json:"items"`
 }
 
-type PatternApplicationConditions struct {
-	Name            string `json:"name,omitempty"`
-	AppSyncStatus   string `json:"syncStatus,omitempty"`
-	AppHealthStatus string `json:"healthStatus,omitempty"`
-}
-
 type PatternCondition struct {
 	// Type of deployment condition.
 	Type PatternConditionType `json:"type"`
@@ -210,8 +213,6 @@ type PatternCondition struct {
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
 	// A human readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
-	// A human readable status for the pattern applications
-	Applications []PatternApplicationConditions `json:"applications,omitempty"`
 }
 
 type PatternConditionType string

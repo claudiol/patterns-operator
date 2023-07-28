@@ -147,6 +147,14 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		return r.actionPerformed(qualifiedInstance, "applying defaults", err)
 	}
+	r.logger.Info("Applied Defaults")
+
+	qualifiedInstance, err = r.applyPatternAppDetails(r.argoClient, qualifiedInstance)
+
+	if err != nil {
+		return r.actionPerformed(qualifiedInstance, "application details", err)
+	}
+	r.logger.Info("Applied Pattern details")
 
 	if err := r.preValidation(qualifiedInstance); err != nil {
 		return r.actionPerformed(qualifiedInstance, "prerequisite validation", err)
@@ -504,4 +512,29 @@ func (r *PatternReconciler) actionPerformed(p *api.Pattern, reason string, err e
 		return r.onReconcileErrorWithRequeue(p, reason, err, &delay)
 	}
 	return r.onReconcileErrorWithRequeue(p, reason, err, nil)
+}
+
+func (r *PatternReconciler) applyPatternAppDetails(client argoclient.Interface, input *api.Pattern) (*api.Pattern, error) {
+	output := input.DeepCopy()
+	var applicationInfo api.PatternApplicationInfo
+
+	// Get the applications from the namespace
+	ns := output.ObjectMeta.Name + "-" + output.Spec.ClusterGroupName
+	// oc get Applications
+	applications, err := client.ArgoprojV1alpha1().Applications(ns).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	for _, app := range applications.Items {
+		fmt.Println(app.Name)
+		fmt.Println(app.Status.Health.Status)
+		fmt.Println(app.Status.Sync.Status)
+		applicationInfo.Name = app.Name
+		applicationInfo.AppHealthStatus = string(app.Status.Health.Status)
+		applicationInfo.AppHealthMessage = app.Status.Health.Message
+		applicationInfo.AppSyncStatus = string(app.Status.Sync.Status)
+		output.Status.Applications = append(output.Status.Applications, *applicationInfo.DeepCopy())
+	}
+	fmt.Print(output.Status)
+	return output, err
 }
