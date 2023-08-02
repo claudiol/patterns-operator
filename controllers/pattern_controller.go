@@ -149,12 +149,25 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	r.logger.Info("Applied Defaults")
 
-	qualifiedInstance, err = r.applyPatternAppDetails(r.argoClient, qualifiedInstance)
+	if haveNamespace(r.Client, applicationNamespace) {
+		if len(qualifiedInstance.Status.Applications) > 0 {
+			qualifiedInstance.Status.Applications = nil
+		}
+		qualifiedInstance, err = r.applyPatternAppDetails(r.argoClient, qualifiedInstance)
 
-	if err != nil {
-		return r.actionPerformed(qualifiedInstance, "application details", err)
+		if err != nil {
+			return r.actionPerformed(qualifiedInstance, "application pattern details", err)
+		}
+		r.logger.Info("Applied Pattern details")
 	}
-	r.logger.Info("Applied Pattern details")
+	if qualifiedInstance != nil {
+		fmt.Print("Qualified Instance: ")
+		fmt.Println(qualifiedInstance)
+		if qualifiedInstance.Status.Applications != nil {
+			fmt.Print("Applications: ")
+			fmt.Println(qualifiedInstance.Status.Applications)
+		}
+	}
 
 	if err := r.preValidation(qualifiedInstance); err != nil {
 		return r.actionPerformed(qualifiedInstance, "prerequisite validation", err)
@@ -249,7 +262,11 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	log.Printf("\x1b[32;1m\tReconcile complete\x1b[0m\n")
 
-	return ctrl.Result{}, nil
+	result := ctrl.Result{
+		Requeue:      false,
+		RequeueAfter: 180 * time.Second,
+	}
+	return result, nil
 }
 
 func validGitRepoURL(repoURL string) error {
@@ -523,18 +540,21 @@ func (r *PatternReconciler) applyPatternAppDetails(client argoclient.Interface, 
 	// oc get Applications
 	applications, err := client.ArgoprojV1alpha1().Applications(ns).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
-		return nil, err
+		return output, err
 	}
+
+	if len(output.Status.Applications) > 0 {
+		output.Status.Applications = nil
+	}
+
 	for _, app := range applications.Items {
-		fmt.Println(app.Name)
-		fmt.Println(app.Status.Health.Status)
-		fmt.Println(app.Status.Sync.Status)
+		fmt.Println(app.Name, " ==> [", app.Status.Health.Status, "] == [", app.Status.Sync.Status, "]")
 		applicationInfo.Name = app.Name
 		applicationInfo.AppHealthStatus = string(app.Status.Health.Status)
 		applicationInfo.AppHealthMessage = app.Status.Health.Message
 		applicationInfo.AppSyncStatus = string(app.Status.Sync.Status)
 		output.Status.Applications = append(output.Status.Applications, *applicationInfo.DeepCopy())
 	}
-	fmt.Print(output.Status)
+	fmt.Println(output.Status)
 	return output, err
 }
