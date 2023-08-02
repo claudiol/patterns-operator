@@ -49,6 +49,7 @@ import (
 
 	api "github.com/hybrid-cloud-patterns/patterns-operator/api/v1alpha1"
 	operatorclient "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1"
+	Client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // PatternReconciler reconciles a Pattern object
@@ -149,24 +150,24 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	r.logger.Info("Applied Defaults")
 
+	// MBP-184 Implementation
+	// Ensure that the openshift-gitops namespace is present
+	// This namespace gets created by the OpenShift GitOps operator
+	// when it is installed.
 	if haveNamespace(r.Client, applicationNamespace) {
+		// If there are Application status present reset the array
 		if len(qualifiedInstance.Status.Applications) > 0 {
 			qualifiedInstance.Status.Applications = nil
 		}
+
+		// Retrieve the Pattern Application Details and apply them to the CR
 		qualifiedInstance, err = r.applyPatternAppDetails(r.argoClient, qualifiedInstance)
 
 		if err != nil {
 			return r.actionPerformed(qualifiedInstance, "application pattern details", err)
 		}
+
 		r.logger.Info("Applied Pattern details")
-	}
-	if qualifiedInstance != nil {
-		fmt.Print("Qualified Instance: ")
-		fmt.Println(qualifiedInstance)
-		if qualifiedInstance.Status.Applications != nil {
-			fmt.Print("Applications: ")
-			fmt.Println(qualifiedInstance.Status.Applications)
-		}
 	}
 
 	if err := r.preValidation(qualifiedInstance); err != nil {
@@ -262,6 +263,10 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	log.Printf("\x1b[32;1m\tReconcile complete\x1b[0m\n")
 
+	// MBP-184 Implementation
+	// This is a temporary hack to ensure that the Reconcile loop
+	// gets called every 3 minutes.
+	// TODO: Need to create a watch routing for Pattern Applications
 	result := ctrl.Result{
 		Requeue:      false,
 		RequeueAfter: 180 * time.Second,
@@ -531,30 +536,59 @@ func (r *PatternReconciler) actionPerformed(p *api.Pattern, reason string, err e
 	return r.onReconcileErrorWithRequeue(p, reason, err, nil)
 }
 
+// MBP-184 Implementation
+// applyPatternAppDetails retrieves the status for the Pattern applications created in ArgoCD.
+// Once the Application Status is retrieve it appends the information
+// to the array and the CR is updated.
 func (r *PatternReconciler) applyPatternAppDetails(client argoclient.Interface, input *api.Pattern) (*api.Pattern, error) {
 	output := input.DeepCopy()
 	var applicationInfo api.PatternApplicationInfo
 
-	// Get the applications from the namespace
+	// Buid the namespace from the Pattern ObjectMeta.Name and Spec.ClusterGroupName
 	ns := output.ObjectMeta.Name + "-" + output.Spec.ClusterGroupName
-	// oc get Applications
+	// oc get Applications -n [pattern-name]-hub
+	// E.G. oc get Applications -n multicloud-gitops-hub
 	applications, err := client.ArgoprojV1alpha1().Applications(ns).List(context.Background(), metav1.ListOptions{})
+
+	// Return error
 	if err != nil {
 		return output, err
 	}
 
+	// Reset the array since we are going to replace it with the new application status
 	if len(output.Status.Applications) > 0 {
 		output.Status.Applications = nil
 	}
 
+	// Loop through the Pattern Applications and append the details to the Applications array
 	for _, app := range applications.Items {
-		fmt.Println(app.Name, " ==> [", app.Status.Health.Status, "] == [", app.Status.Sync.Status, "]")
+		//fmt.Println(app.Name, " ==> [", app.Status.Health.Status, "] == [", app.Status.Sync.Status, "]")
 		applicationInfo.Name = app.Name
 		applicationInfo.AppHealthStatus = string(app.Status.Health.Status)
 		applicationInfo.AppHealthMessage = app.Status.Health.Message
 		applicationInfo.AppSyncStatus = string(app.Status.Sync.Status)
 		output.Status.Applications = append(output.Status.Applications, *applicationInfo.DeepCopy())
 	}
-	fmt.Println(output.Status)
+
+	// Update CR for the Pattern Instance
+	if output.Status.Applications != nil {
+		// Create an empty Pattern CR
+		patternCR := &api.Pattern{}
+
+		// Get the current Pattern CR
+		_ = r.Client.Get(context.TODO(), Client.ObjectKey{
+			Namespace: "openshift-operators",
+			Name:      output.ObjectMeta.Name}, patternCR)
+
+		// Replace the array in the CR for the applications
+		// with the newly generated array
+		patternCR.Status.Applications = output.Status.Applications
+
+		// Now let's update the CR with the application status data.
+		err = r.Client.Status().Update(context.Background(), patternCR)
+		if err != nil {
+			return output, err
+		}
+	}
 	return output, err
 }
