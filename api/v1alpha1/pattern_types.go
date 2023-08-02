@@ -134,6 +134,10 @@ type GitOpsConfig struct {
 	UseCSV bool `json:"useCSV,omitempty"`
 }
 
+// PatternApplicationInfo defines the Applications
+// Status for the Pattern.
+// This structure is part of the PatternStatus as an array
+// The Application Status will be included as part of the Observed state of Pattern
 type PatternApplicationInfo struct {
 	Name             string `json:"name,omitempty"`
 	AppSyncStatus    string `json:"syncStatus,omitempty"`
