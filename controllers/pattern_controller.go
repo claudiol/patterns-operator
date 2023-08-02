@@ -584,11 +584,15 @@ func (r *PatternReconciler) applyPatternAppDetails(client argoclient.Interface, 
 		// with the newly generated array
 		patternCR.Status.Applications = output.Status.Applications
 
+		// Update last step in CR
+		patternCR.Status.LastStep = "update pattern application status"
+
 		// Now let's update the CR with the application status data.
 		err = r.Client.Status().Update(context.Background(), patternCR)
 		if err != nil {
 			return output, err
 		}
+
 	}
 	return output, err
 }
