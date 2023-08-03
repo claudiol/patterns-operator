@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	argoapi "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -139,10 +140,12 @@ type GitOpsConfig struct {
 // This structure is part of the PatternStatus as an array
 // The Application Status will be included as part of the Observed state of Pattern
 type PatternApplicationInfo struct {
-	Name             string `json:"name,omitempty"`
-	AppSyncStatus    string `json:"syncStatus,omitempty"`
-	AppHealthStatus  string `json:"healthStatus,omitempty"`
-	AppHealthMessage string `json:"healthMessage,omitempty"`
+	Name             string                         `json:"name,omitempty"`
+	AppSyncStatus    string                         `json:"syncStatus,omitempty"`
+	AppHealthStatus  string                         `json:"healthStatus,omitempty"`
+	AppHealthMessage string                         `json:"healthMessage,omitempty"`
+	AppReconcileTime string                         `json:"lastReconcileTime,omitempty"`
+	AppConditions    []argoapi.ApplicationCondition `json:"conditions,omitempty"`
 }
 
 // PatternStatus defines the observed state of Pattern

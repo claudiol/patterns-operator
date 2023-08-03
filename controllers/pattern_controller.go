@@ -563,10 +563,19 @@ func (r *PatternReconciler) applyPatternAppDetails(client argoclient.Interface, 
 	// Loop through the Pattern Applications and append the details to the Applications array
 	for _, app := range applications.Items {
 		//fmt.Println(app.Name, " ==> [", app.Status.Health.Status, "] == [", app.Status.Sync.Status, "]")
+		// Add Application information to ApplicationInfo struct
 		applicationInfo.Name = app.Name
 		applicationInfo.AppHealthStatus = string(app.Status.Health.Status)
 		applicationInfo.AppHealthMessage = app.Status.Health.Message
 		applicationInfo.AppSyncStatus = string(app.Status.Sync.Status)
+		if len(app.Status.Conditions) > 0 {
+			// Reset Conditions array
+			applicationInfo.AppConditions = nil
+			for _, condition := range app.Status.Conditions {
+				applicationInfo.AppConditions = append(applicationInfo.AppConditions, condition)
+			}
+		}
+
 		output.Status.Applications = append(output.Status.Applications, *applicationInfo.DeepCopy())
 	}
 
