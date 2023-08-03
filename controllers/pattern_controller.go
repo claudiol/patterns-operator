@@ -568,14 +568,12 @@ func (r *PatternReconciler) applyPatternAppDetails(client argoclient.Interface, 
 		applicationInfo.AppHealthStatus = string(app.Status.Health.Status)
 		applicationInfo.AppHealthMessage = app.Status.Health.Message
 		applicationInfo.AppSyncStatus = string(app.Status.Sync.Status)
-		if len(app.Status.Conditions) > 0 {
-			// Reset Conditions array
-			applicationInfo.AppConditions = nil
-			for _, condition := range app.Status.Conditions {
-				applicationInfo.AppConditions = append(applicationInfo.AppConditions, condition)
-			}
+		applicationInfo.AppReconcileTime = app.Status.ReconciledAt.String()
+		if len(app.Status.Conditions) <= 0 {
+			applicationInfo.AppCondition.Conditions = nil // Reset Conditions array
+		} else {
+			applicationInfo.AppCondition.Conditions = append(applicationInfo.AppCondition.Conditions, app.Status.Conditions...)
 		}
-
 		output.Status.Applications = append(output.Status.Applications, *applicationInfo.DeepCopy())
 	}
 

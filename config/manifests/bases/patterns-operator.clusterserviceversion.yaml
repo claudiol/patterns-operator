@@ -80,24 +80,24 @@ spec:
         displayName: Use CSV
         path: gitOpsSpec.useCSV
       statusDescriptors:
+      - displayName: Cluster Name
+        path: clusterName
       - displayName: App Cluster Domain
         path: appClusterDomain
       - displayName: Cluster Domain
         path: clusterDomain
       - displayName: Cluster ID
         path: clusterID
-      - displayName: Cluster Name
-        path: clusterName
       - displayName: Cluster Platform
         path: clusterPlatform
       - displayName: Cluster Version
         path: clusterVersion
-      - description: Last error encountered by the pattern
-        displayName: Last Error
-        path: lastError
       - description: Last action related to the pattern
         displayName: Last Step
         path: lastStep
+      - description: Last error encountered by the pattern
+        displayName: Last Error
+        path: lastError
       - description: Number of updates to the pattern
         displayName: Version
         path: version

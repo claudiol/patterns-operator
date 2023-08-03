@@ -135,17 +135,29 @@ type GitOpsConfig struct {
 	UseCSV bool `json:"useCSV,omitempty"`
 }
 
+// PatternApplicationCondition defines the status of the Applications
+// This stucture is part of the PatternApplicationInfo structure
+type PatternApplicationCondition struct {
+	Conditions []argoapi.ApplicationCondition `json:"appConditions,omitempty"`
+}
+
 // PatternApplicationInfo defines the Applications
 // Status for the Pattern.
 // This structure is part of the PatternStatus as an array
 // The Application Status will be included as part of the Observed state of Pattern
 type PatternApplicationInfo struct {
-	Name             string                         `json:"name,omitempty"`
-	AppSyncStatus    string                         `json:"syncStatus,omitempty"`
-	AppHealthStatus  string                         `json:"healthStatus,omitempty"`
-	AppHealthMessage string                         `json:"healthMessage,omitempty"`
-	AppReconcileTime string                         `json:"lastReconcileTime,omitempty"`
-	AppConditions    []argoapi.ApplicationCondition `json:"conditions,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=1
+	Name string `json:"name,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=2
+	AppSyncStatus string `json:"syncStatus,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=3
+	AppHealthStatus string `json:"healthStatus,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=4
+	AppHealthMessage string `json:"healthMessage,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=5
+	AppReconcileTime string `json:"lastReconcileTime,omitempty"`
+	//+operator-sdk:csv:customerresourcedefinitions:type=condition,order=6
+	AppCondition PatternApplicationCondition `json:"condition,omitempty"`
 }
 
 // PatternStatus defines the observed state of Pattern
@@ -153,32 +165,32 @@ type PatternStatus struct {
 	// Observed state of the pattern
 
 	// Last action related to the pattern
-	// +operator-sdk:csv:customresourcedefinitions:type=status
+	// +operator-sdk:csv:customresourcedefinitions:type=status,order=9
 	LastStep string `json:"lastStep,omitempty"`
 
 	// Last error encountered by the pattern
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=10
 	LastError string `json:"lastError,omitempty"`
 
 	// Number of updates to the pattern
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=11
 	Version int `json:"version,omitempty"`
 
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=1
 	ClusterName string `json:"clusterName,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=2
 	AppClusterDomain string `json:"appClusterDomain,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=3
 	ClusterDomain string `json:"clusterDomain,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=4
 	ClusterID string `json:"clusterID,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=5
 	ClusterPlatform string `json:"clusterPlatform,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status
+	//+operator-sdk:csv:customresourcedefinitions:type=status,order=6
 	ClusterVersion string `json:"clusterVersion,omitempty"`
-	//+operator-sdk:csv:customerresourcedefinitions:type=conditions
+	//+operator-sdk:csv:customerresourcedefinitions:type=conditions,order=7
 	Conditions []PatternCondition `json:"conditions,omitempty"`
-	//+operator-sdk:csv:customerresourcedefinitions:type=status
+	//+operator-sdk:csv:customerresourcedefinitions:type=status,order=8
 	Applications []PatternApplicationInfo `json:"applications,omitempty"`
 }
 

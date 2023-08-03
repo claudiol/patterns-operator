@@ -138,9 +138,40 @@ spec:
                     an array The Application Status will be included as part of the
                     Observed state of Pattern
                   properties:
+                    condition:
+                      description: PatternApplicationCondition defines the status
+                        of the Applications This stucture is part of the PatternApplicationInfo
+                        structure
+                      properties:
+                        appConditions:
+                          items:
+                            description: ApplicationCondition contains details about
+                              an application condition, which is usally an error or
+                              warning
+                            properties:
+                              lastTransitionTime:
+                                description: LastTransitionTime is the time the condition
+                                  was last observed
+                                format: date-time
+                                type: string
+                              message:
+                                description: Message contains human-readable message
+                                  indicating details about condition
+                                type: string
+                              type:
+                                description: Type is an application condition type
+                                type: string
+                            required:
+                            - message
+                            - type
+                            type: object
+                          type: array
+                      type: object
                     healthMessage:
                       type: string
                     healthStatus:
+                      type: string
+                    lastReconcileTime:
                       type: string
                     name:
                       type: string
