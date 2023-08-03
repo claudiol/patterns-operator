@@ -135,12 +135,6 @@ type GitOpsConfig struct {
 	UseCSV bool `json:"useCSV,omitempty"`
 }
 
-// PatternApplicationCondition defines the status of the Applications
-// This stucture is part of the PatternApplicationInfo structure
-type PatternApplicationCondition struct {
-	Conditions []argoapi.ApplicationCondition `json:"appConditions,omitempty"`
-}
-
 // PatternApplicationInfo defines the Applications
 // Status for the Pattern.
 // This structure is part of the PatternStatus as an array
@@ -156,8 +150,8 @@ type PatternApplicationInfo struct {
 	AppHealthMessage string `json:"healthMessage,omitempty"`
 	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=5
 	AppReconcileTime string `json:"lastReconcileTime,omitempty"`
-	//+operator-sdk:csv:customerresourcedefinitions:type=condition,order=6
-	AppCondition PatternApplicationCondition `json:"condition,omitempty"`
+	//+operator-sdk:csv:customerresourcedefinitions:type=appications,order=6
+	Conditions []argoapi.ApplicationCondition `json:"conditions,omitempty"`
 }
 
 // PatternStatus defines the observed state of Pattern
