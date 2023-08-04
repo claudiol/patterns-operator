@@ -140,18 +140,13 @@ type GitOpsConfig struct {
 // This structure is part of the PatternStatus as an array
 // The Application Status will be included as part of the Observed state of Pattern
 type PatternApplicationInfo struct {
-	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=1
-	Name string `json:"name,omitempty"`
-	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=2
-	AppSyncStatus string `json:"syncStatus,omitempty"`
-	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=3
-	AppHealthStatus string `json:"healthStatus,omitempty"`
-	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=4
-	AppHealthMessage string `json:"healthMessage,omitempty"`
-	// +operator-sdk:csv:customresourcedefinitions:type=applications,order=5
-	AppReconcileTime string `json:"lastReconcileTime,omitempty"`
-	//+operator-sdk:csv:customerresourcedefinitions:type=appications,order=6
-	Conditions []argoapi.ApplicationCondition `json:"conditions,omitempty"`
+	Name             string                         `json:"name,omitempty"`
+	AppSyncStatus    string                         `json:"syncStatus,omitempty"`
+	AppHealthStatus  string                         `json:"healthStatus,omitempty"`
+	AppHealthMessage string                         `json:"healthMessage,omitempty"`
+	AppReconcileTime string                         `json:"lastReconcileTime,omitempty"`
+	Conditions       []argoapi.ApplicationCondition `json:"conditions,omitempty"`
+	Resources        []argoapi.ResourceStatus       `json:"resources,omitempty"`
 }
 
 // PatternStatus defines the observed state of Pattern
@@ -159,32 +154,32 @@ type PatternStatus struct {
 	// Observed state of the pattern
 
 	// Last action related to the pattern
-	// +operator-sdk:csv:customresourcedefinitions:type=status,order=9
+	// +operator-sdk:csv:customresourcedefinitions:type=status
 	LastStep string `json:"lastStep,omitempty"`
 
 	// Last error encountered by the pattern
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=10
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	LastError string `json:"lastError,omitempty"`
 
 	// Number of updates to the pattern
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=11
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	Version int `json:"version,omitempty"`
 
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=1
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	ClusterName string `json:"clusterName,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=2
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	AppClusterDomain string `json:"appClusterDomain,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=3
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	ClusterDomain string `json:"clusterDomain,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=4
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	ClusterID string `json:"clusterID,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=5
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	ClusterPlatform string `json:"clusterPlatform,omitempty"`
-	//+operator-sdk:csv:customresourcedefinitions:type=status,order=6
+	//+operator-sdk:csv:customresourcedefinitions:type=status
 	ClusterVersion string `json:"clusterVersion,omitempty"`
-	//+operator-sdk:csv:customerresourcedefinitions:type=conditions,order=7
+	//+operator-sdk:csv:customerresourcedefinitions:type=conditions
 	Conditions []PatternCondition `json:"conditions,omitempty"`
-	//+operator-sdk:csv:customerresourcedefinitions:type=status,order=8
+	//+operator-sdk:csv:customerresourcedefinitions:type=status
 	Applications []PatternApplicationInfo `json:"applications,omitempty"`
 }
 

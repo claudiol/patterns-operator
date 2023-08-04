@@ -168,6 +168,48 @@ spec:
                       type: string
                     name:
                       type: string
+                    resources:
+                      items:
+                        description: 'ResourceStatus holds the current sync and health
+                          status of a resource TODO: describe members of this type'
+                        properties:
+                          group:
+                            type: string
+                          health:
+                            description: HealthStatus contains information about the
+                              currently observed health state of an application or
+                              resource
+                            properties:
+                              message:
+                                description: Message is a human-readable informational
+                                  message describing the health status
+                                type: string
+                              status:
+                                description: Status holds the status code of the application
+                                  or resource
+                                type: string
+                            type: object
+                          hook:
+                            type: boolean
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                          requiresPruning:
+                            type: boolean
+                          status:
+                            description: SyncStatusCode is a type which represents
+                              possible comparison results
+                            type: string
+                          syncWave:
+                            format: int64
+                            type: integer
+                          version:
+                            type: string
+                        type: object
+                      type: array
                     syncStatus:
                       type: string
                   type: object

@@ -21,12 +21,12 @@ metadata:
       ]
     capabilities: Basic Install
     categories: OpenShift Optional
-    containerImage: quay.io/claudiol/patterns-operator:6.6.44
+    containerImage: quay.io/claudiol/patterns-operator:6.6.45
     description: An operator to deploy and manage architecture patterns from https://hybrid-cloud-patterns.io
     operators.operatorframework.io/builder: operator-sdk-v1.22.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     repository: https://github.com/hybrid-cloud-patterns/patterns-operator
-  name: patterns-operator.v6.6.44
+  name: patterns-operator.v6.6.45
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -98,24 +98,24 @@ spec:
         displayName: Use CSV
         path: gitOpsSpec.useCSV
       statusDescriptors:
-      - displayName: Cluster Name
-        path: clusterName
       - displayName: App Cluster Domain
         path: appClusterDomain
       - displayName: Cluster Domain
         path: clusterDomain
       - displayName: Cluster ID
         path: clusterID
+      - displayName: Cluster Name
+        path: clusterName
       - displayName: Cluster Platform
         path: clusterPlatform
       - displayName: Cluster Version
         path: clusterVersion
-      - description: Last action related to the pattern
-        displayName: Last Step
-        path: lastStep
       - description: Last error encountered by the pattern
         displayName: Last Error
         path: lastError
+      - description: Last action related to the pattern
+        displayName: Last Step
+        path: lastStep
       - description: Number of updates to the pattern
         displayName: Version
         path: version
@@ -275,7 +275,7 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
-                image: quay.io/claudiol/patterns-operator:6.6.44
+                image: quay.io/claudiol/patterns-operator:6.6.45
                 imagePullPolicy: IfNotPresent
                 livenessProbe:
                   httpGet:
@@ -362,4 +362,4 @@ spec:
   provider:
     name: Red Hat
     url: https://www.redhat.com/en/products/edge/validated-patterns
-  version: 6.6.44
+  version: 6.6.45

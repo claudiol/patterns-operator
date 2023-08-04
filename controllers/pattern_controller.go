@@ -574,6 +574,8 @@ func (r *PatternReconciler) applyPatternAppDetails(client argoclient.Interface, 
 		} else {
 			applicationInfo.Conditions = append(applicationInfo.Conditions, app.Status.Conditions...)
 		}
+
+		// Now let's append the Application Information
 		output.Status.Applications = append(output.Status.Applications, *applicationInfo.DeepCopy())
 	}
 
