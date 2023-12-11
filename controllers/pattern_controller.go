@@ -119,12 +119,31 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return reconcile.Result{}, err
 	}
 
+	log.Printf("============== Instance Details =====================")
+	log.Print(instance.Name)
+	log.Print(instance.Namespace)
+	log.Print(instance.Spec.MultiSourceConfig.Enabled)
+	log.Printf("============== Instance Details =====================")
+
+	tempInstance := instance.DeepCopy()
+
 	// Remove the ArgoCD application on deletion
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Add finalizer when object is created
 		if !controllerutil.ContainsFinalizer(instance, api.PatternFinalizer) {
 			controllerutil.AddFinalizer(instance, api.PatternFinalizer)
+			log.Printf("============== Before Updated Instance Details =====================")
+			log.Print(instance.Name)
+			log.Print(instance.Namespace)
+			log.Print(instance.Spec.MultiSourceConfig.Enabled)
+			log.Printf("============== Before Updated Instance Details =====================")
 			err = r.Client.Update(context.TODO(), instance)
+			log.Printf("============== Updated Instance Details =====================")
+			log.Print(instance.Name)
+			log.Print(instance.Namespace)
+			log.Print(instance.Spec.MultiSourceConfig.Enabled)
+			log.Printf("============== Updated Instance Details =====================")
+			instance.Spec.MultiSourceConfig.Enabled = tempInstance.Spec.MultiSourceConfig.Enabled
 			return r.actionPerformed(instance, "updated finalizer", err)
 		}
 	} else if err = r.finalizeObject(instance); err != nil {
