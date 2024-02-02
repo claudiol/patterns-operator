@@ -4,6 +4,9 @@ cloud.google.com/go/compute/internal
 # cloud.google.com/go/compute/metadata v0.2.3
 ## explicit; go 1.19
 cloud.google.com/go/compute/metadata
+# code.gitea.io/sdk/gitea v0.15.1
+## explicit; go 1.13
+code.gitea.io/sdk/gitea
 # dario.cat/mergo v1.0.0
 ## explicit; go 1.13
 dario.cat/mergo
@@ -450,6 +453,9 @@ github.com/gosuri/uitable/util/wordwrap
 ## explicit
 github.com/gregjones/httpcache
 github.com/gregjones/httpcache/diskcache
+# github.com/hashicorp/go-version v1.2.1
+## explicit
+github.com/hashicorp/go-version
 # github.com/huandu/xstrings v1.3.3
 ## explicit; go 1.12
 github.com/huandu/xstrings

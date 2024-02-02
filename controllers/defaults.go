@@ -66,6 +66,10 @@ const (
 	Gitea_Default_Version = "0.0.3"
 	// Default Gitea Admin user
 	Gitea_Admin_User = "gitea_admin"
+	// Gitea Admin Secrets name
+	Gitea_Admin_Secret_Name = "gitea-admin-secret"
+	// GiteaServer default name
+	GiteaServer_Default_Name = "vp-gitea-instance"
 )
 
 // Default constants

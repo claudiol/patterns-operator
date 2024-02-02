@@ -26,6 +26,7 @@ require (
 )
 
 require (
+	code.gitea.io/sdk/gitea v0.15.1
 	github.com/gofrs/flock v0.8.1
 	github.com/pkg/errors v0.9.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -106,6 +107,7 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
+	github.com/hashicorp/go-version v1.2.1 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

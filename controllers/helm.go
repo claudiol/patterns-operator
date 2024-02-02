@@ -1,3 +1,19 @@
+/*
+Copyright 2022.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package controllers
 
 import (
@@ -203,23 +219,27 @@ func InstallChart(releaseName, repoName, chartName, version string, args map[str
 
 // UnInstallChart
 func UnInstallChart(name, namespace string) (bool, error) {
-	actionConfig := new(action.Configuration)
-	fmt.Println("Chart: ", name, " Namespace: ", namespace)
-	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), debugf); err != nil {
-		return false, err
+
+	if fDeployed, _ := isChartDeployed(name, namespace); fDeployed {
+		actionConfig := new(action.Configuration)
+		fmt.Println("Chart: ", name, " Namespace: ", namespace)
+		if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), debugf); err != nil {
+			return false, err
+		}
+
+		client := action.NewUninstall(actionConfig)
+
+		// Wait for chart to be uninstalled
+		client.Wait = true
+
+		// Uninstall the Helm chart
+		releaseInfo, err := client.Run(name)
+		if err != nil {
+			return false, err
+		}
+		fmt.Println("Uninstalled Helm Chart [", releaseInfo.Release.Name, "] in Namespace [", releaseInfo.Release.Namespace, "]")
+		return true, nil
 	}
-
-	client := action.NewUninstall(actionConfig)
-
-	// Wait for chart to be uninstalled
-	client.Wait = true
-
-	// Uninstall the Helm chart
-	releaseInfo, err := client.Run(name)
-	if err != nil {
-		return false, err
-	}
-	fmt.Println("Uninstalled Helm Chart [", releaseInfo.Release.Name, "] in Namespace [", releaseInfo.Release.Namespace, "]")
 	return true, nil
 }
 func isChartDeployed(name, namespace string) (bool, error) {

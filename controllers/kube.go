@@ -128,7 +128,20 @@ func getRoute(controllerClient client.Client, name, ns string) (string, error) {
 		return "", err
 	}
 
-	giteaURL := fmt.Sprintf("https://%s", route.Status.Ingress[0].Host)
+	url := fmt.Sprintf("https://%s", route.Status.Ingress[0].Host)
 
-	return giteaURL, nil
+	return url, nil
+}
+
+// Get a Secret instance
+func getSecret(controllerClient client.Client, name, ns string) (*v1.Secret, error) {
+	secret := &v1.Secret{}
+	err := controllerClient.Get(context.Background(), types.NamespacedName{Name: name, Namespace: ns}, secret)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil, err
+		}
+		return nil, err
+	}
+	return secret, nil
 }

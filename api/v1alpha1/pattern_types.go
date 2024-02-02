@@ -84,39 +84,44 @@ type PatternSpec struct {
 type GitConfig struct {
 	// Account              string `json:"account,omitempty"`
 
+	// (EXPERIMENTAL) Enable gitea support when deploying the pattern
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=1,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// +kubebuilder:default:=false
+	Enabled *bool `json:"enabled,omitempty"`
+
 	// Git repo containing the pattern to deploy. Must use https/http or, for ssh, git@server:foo/bar.git
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=2,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:true"}
 	TargetRepo string `json:"targetRepo"`
 
 	// Branch, tag, or commit to deploy.  Does not support short-sha's. Default: HEAD
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=2
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=3,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:true"}
 	TargetRevision string `json:"targetRevision,omitempty"`
 
 	// Upstream git repo containing the pattern to deploy. Used when in-cluster fork to point to the upstream pattern repository
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=3
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=4,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:false"}
 	OriginRepo string `json:"originRepo,omitempty"`
 
 	// Branch, tag or commit in the upstream git repository. Does not support short-sha's. Default to HEAD
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=4
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=5,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:false"}
 	OriginRevision string `json:"originRevision,omitempty"`
 
 	// Interval in seconds to poll for drifts between origin and target repositories. Default: 180 seconds
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=5,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=6,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"},xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:false"}
 	// +kubebuilder:default:=180
 	PollInterval int `json:"pollInterval,omitempty"`
 
 	// Optional. FQDN of the git server if automatic parsing from TargetRepo is broken
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=6
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=7,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:false"}
 	Hostname string `json:"hostname,omitempty"`
 
 	// Optional. K8s secret name where the info for connecting to git can be found. The supported secrets are modeled after the
 	// private repositories in argo (https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#repositories)
 	// currently ssh and username+password are supported
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=7
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=8,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:false"}
 	TokenSecret string `json:"tokenSecret,omitempty"`
 
 	// Optional. K8s secret namespace where the token for connecting to git can be found
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=8
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=9,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:fieldDependency:gitSpec.enabled:false"}
 	TokenSecretNamespace string `json:"tokenSecretNamespace,omitempty"`
 }
 
