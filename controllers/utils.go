@@ -18,11 +18,15 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/url"
 	"path"
 	"strings"
+
+	// Added to support generatePassword
+	"crypto/rand"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/go-errors/errors"
@@ -187,4 +191,14 @@ func compareMaps(m1, m2 map[string][]byte) bool {
 	}
 
 	return true
+}
+
+// Generate a random password
+func GenerateRandomPassword(length int) (string, error) {
+	rndbytes := make([]byte, length)
+	_, err := rand.Read(rndbytes)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(rndbytes), nil
 }

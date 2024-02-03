@@ -51,8 +51,6 @@ import (
 	operatorclient "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1"
 )
 
-const ReconcileLoopRequeueTime = 180 * time.Second
-
 // PatternReconciler reconciles a Pattern object
 type PatternReconciler struct {
 	client.Client
@@ -125,6 +123,7 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// Remove the ArgoCD application on deletion
+	//nolint:dupl
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Add finalizer when object is created
 		if !controllerutil.ContainsFinalizer(instance, api.PatternFinalizer) {
@@ -145,12 +144,97 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return reconcile.Result{}, nil
 	}
 
+	// GiteaServer Instance Additions
+	// Check to see if we need GiteaServer instance
+	if *instance.Spec.GitConfig.Enabled {
+		// First let's see if there's a GiteaServer instance
+		// We list all the instances of a GiteaServer
+		// We don't care what the name of the instance is. If there's one present
+		// we assume that the Gitea Server instance is operational.
+		listOpts := client.ListOptions{
+			Namespace: Gitea_Namespace,
+		}
+		giteaServerInstanceList := &api.GiteaServerList{}
+		err = r.Client.List(context.Background(), giteaServerInstanceList, &listOpts)
+
+		// Check to see if there's an error
+		if err != nil {
+			if kerrors.IsNotFound(err) {
+				// Create the GiteaServer instance if not found so that the GiteaServer controller
+				// deploys the Gitea instance
+				giteaServerInstance := &api.GiteaServer{
+					ObjectMeta: metav1.ObjectMeta{Name: GiteaServer_Default_Name, Namespace: instance.Namespace},
+					Spec: api.GiteaServerSpec{
+						HelmChartUrl:     Helm_Chart_Repo_URL,
+						HelmRepoName:     RepoName,
+						HelmChartName:    ChartName,
+						HelmChartVersion: Gitea_Default_Version,
+						HelmReleaseName:  ReleaseName,
+					},
+				}
+				if err = r.Client.Create(context.Background(), giteaServerInstance); err != nil {
+					return r.actionPerformed(instance, "create GiteaServer Instance", err)
+				}
+			}
+			// Something else happened
+			return r.actionPerformed(instance, "list GiteaServer Instances", err)
+		}
+
+		// Let's get the GiteaServer route
+		giteaRouteURL, err := getRoute(r.Client, "gitea-route", Gitea_Namespace)
+		if err != nil {
+			return r.actionPerformed(instance, "GiteaServer route not ready", err)
+		}
+		// Extract the repository name from the original target repo
+		upstreamRepoName, err := extractRepositoryName(instance.Spec.GitConfig.TargetRepo)
+		if err != nil {
+			return r.actionPerformed(instance, "Target Repo URL", err)
+		}
+
+		// Construct the Gitea URL
+		// HACK: The Gitea instance route listens on http and needs to be https
+		// Replace https with http for now
+		giteaRouteURL = strings.Replace(giteaRouteURL, "https:", "http:", 1)
+
+		// We use the gitea_admin user
+		giteaRepoURL := giteaRouteURL
+		giteaRepoURL += "/"
+		giteaRepoURL += Gitea_Admin_User
+		giteaRepoURL += "/"
+		giteaRepoURL += upstreamRepoName
+
+		if instance.Spec.GitConfig.TargetRepo != giteaRepoURL {
+			// Get the gitea_admin secret
+			// oc get secret gitea-admin-secret -o yaml
+			secret, err := getSecret(r.Client, Gitea_Admin_Secret_Name, Gitea_Namespace)
+			if err != nil {
+				return r.actionPerformed(instance, "Gitea Admin Secret", err)
+			}
+
+			// Let's attempt to migrate the repo to Gitea
+			_, _, err = migrateGiteaRepo(string(secret.Data["admin_username"]),
+				string(secret.Data["admin_password"]),
+				instance.Spec.GitConfig.TargetRepo,
+				giteaRouteURL)
+			if err != nil {
+				return r.actionPerformed(instance, "GiteaServer Migrate Repository", err)
+			}
+
+			// Migrate Repo has been done.
+			// Replace the Target Repo with new Gitea Repo URL
+			// and update the pattern CR
+			instance.Spec.GitConfig.TargetRepo = giteaRepoURL
+			err = r.Client.Update(context.Background(), instance)
+			if err != nil {
+				return r.actionPerformed(instance, "Update CR Target Repo", err)
+			}
+		}
+	}
 	// -- Fill in defaults (changes made to a copy and not persisted)
 	qualifiedInstance, err := r.applyDefaults(instance)
 	if err != nil {
 		return r.actionPerformed(qualifiedInstance, "applying defaults", err)
 	}
-
 	if r.AnalyticsClient.SendPatternInstallationInfo(qualifiedInstance) {
 		return r.actionPerformed(qualifiedInstance, "Updated status with identity sent", nil)
 	}
@@ -508,6 +592,7 @@ func (r *PatternReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+//nolint:dupl
 func (r *PatternReconciler) onReconcileErrorWithRequeue(p *api.Pattern, reason string, err error, duration *time.Duration) (reconcile.Result, error) {
 	// err is logged by the reconcileHandler
 	p.Status.LastStep = reason
