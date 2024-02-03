@@ -159,7 +159,8 @@ func (r *GiteaServerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		// the values.yaml file gitea.admin.password
 
 		// Generate a random password for the gitea_admin user
-		gitea_admin_password, err := GenerateRandomPassword(DefaultPasswordLen)
+		var gitea_admin_password string
+		gitea_admin_password, err = GenerateRandomPassword(DefaultPasswordLen)
 		if err != nil {
 			r.logger.Info("Error Generating gitea_admin password:", "info", err)
 		}

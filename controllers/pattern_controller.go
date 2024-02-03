@@ -155,7 +155,7 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			Namespace: Gitea_Namespace,
 		}
 		giteaServerInstanceList := &api.GiteaServerList{}
-		err := r.Client.List(context.Background(), giteaServerInstanceList, &listOpts)
+		err = r.Client.List(context.Background(), giteaServerInstanceList, &listOpts)
 
 		// Check to see if there's an error
 		if err != nil {
@@ -191,7 +191,7 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return r.actionPerformed(instance, "Target Repo URL", err)
 		}
 
-		// Contruct the Gitea URL
+		// Construct the Gitea URL
 		// HACK: The Gitea instance route listens on http and needs to be https
 		// Replace https with http for now
 		giteaRouteURL = strings.Replace(giteaRouteURL, "https:", "http:", 1)

@@ -26,7 +26,7 @@ import (
 	"strings"
 
 	// Added to support generatePassword
-	"math/rand"
+	"crypto/rand"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/go-errors/errors"
@@ -34,12 +34,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	configv1 "github.com/openshift/api/config/v1"
-)
-
-const (
-	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	specialBytes = "!@#$%^&*()_+=-"
-	numBytes     = "0123456789"
 )
 
 var (
@@ -201,10 +195,10 @@ func compareMaps(m1, m2 map[string][]byte) bool {
 
 // Generate a random password
 func GenerateRandomPassword(length int) (string, error) {
-	bytes := make([]byte, length)
-	_, err := rand.Read(bytes)
+	rndbytes := make([]byte, length)
+	_, err := rand.Read(rndbytes)
 	if err != nil {
 		return "", err
 	}
-	return base64.URLEncoding.EncodeToString(bytes), nil
+	return base64.URLEncoding.EncodeToString(rndbytes), nil
 }

@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"fmt"
+	"net/http"
 
 	"code.gitea.io/sdk/gitea"
 )
@@ -39,7 +40,7 @@ func migrateGiteaRepo(username, password, upstreamURL, giteaServerRoute string) 
 	repository, response, _ := giteaclient.GetRepo(Gitea_Admin_User, repoName)
 
 	// Repo has been already migrated
-	if response.Response.StatusCode == 200 {
+	if response.Response.StatusCode == http.StatusOK {
 		return true, repository.HTMLURL, nil
 	}
 

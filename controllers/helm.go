@@ -197,7 +197,7 @@ func InstallChart(releaseName, repoName, chartName, version string, args map[str
 					RepositoryConfig: settings.RepositoryConfig,
 					RepositoryCache:  settings.RepositoryCache,
 				}
-				if err = man.Update(); err != nil {
+				if err := man.Update(); err != nil {
 					return false, err
 				}
 			} else {
@@ -219,7 +219,6 @@ func InstallChart(releaseName, repoName, chartName, version string, args map[str
 
 // UnInstallChart
 func UnInstallChart(name, namespace string) (bool, error) {
-
 	if fDeployed, _ := isChartDeployed(name, namespace); fDeployed {
 		actionConfig := new(action.Configuration)
 		fmt.Println("Chart: ", name, " Namespace: ", namespace)
