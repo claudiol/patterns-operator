@@ -197,7 +197,7 @@ func InstallChart(releaseName, repoName, chartName, version string, args map[str
 					RepositoryConfig: settings.RepositoryConfig,
 					RepositoryCache:  settings.RepositoryCache,
 				}
-				if err := man.Update(); err != nil { //nolint:govet
+				if err = man.Update(); err != nil {
 					return false, err
 				}
 			} else {

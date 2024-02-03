@@ -165,12 +165,11 @@ func (r *PatternReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				giteaServerInstance := &api.GiteaServer{
 					ObjectMeta: metav1.ObjectMeta{Name: GiteaServer_Default_Name, Namespace: instance.Namespace},
 					Spec: api.GiteaServerSpec{
-						HelmChartUrl: Helm_Chart_Repo_URL,
-						Namespace:    Gitea_Namespace,
-						RepoName:     RepoName,
-						ChartName:    ChartName,
-						Version:      Gitea_Default_Version,
-						ReleaseName:  ReleaseName,
+						HelmChartUrl:     Helm_Chart_Repo_URL,
+						HelmRepoName:     RepoName,
+						HelmChartName:    ChartName,
+						HelmChartVersion: Gitea_Default_Version,
+						HelmReleaseName:  ReleaseName,
 					},
 				}
 				if err = r.Client.Create(context.Background(), giteaServerInstance); err != nil {

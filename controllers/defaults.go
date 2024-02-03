@@ -61,7 +61,7 @@ const (
 	// Release name used by the Helm SDK
 	ReleaseName = "gitea"
 	// Namespace for the Gitea resources
-	Gitea_Namespace = "gitea"
+	Gitea_Namespace = "vp-gitea"
 	// Our gitea-chart default version
 	Gitea_Default_Version = "0.0.3"
 	// Default Gitea Admin user

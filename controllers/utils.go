@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/url"
@@ -26,7 +27,6 @@ import (
 
 	// Added to support generatePassword
 	"math/rand"
-	"time"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/go-errors/errors"
@@ -199,26 +199,12 @@ func compareMaps(m1, m2 map[string][]byte) bool {
 	return true
 }
 
-// Generate a password
-func generateStringPassword(length int, includeNumber, includeSpecial bool) string {
-	var password []byte
-	var charSource string
-
-	// Already using math/rand instead of crypto/rand
-	//nolint:gosec
-	generator := rand.New(rand.NewSource(time.Now().UnixNano()))
-	if includeNumber {
-		charSource += numBytes
+// Generate a random password
+func GenerateRandomPassword(length int) (string, error) {
+	bytes := make([]byte, length)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
 	}
-	if includeSpecial {
-		charSource += specialBytes
-	}
-	charSource += letterBytes
-
-	for i := 0; i < length; i++ {
-		randNum := generator.Intn(len(charSource))
-		password = append(password, charSource[randNum])
-	}
-
-	return string(password)
+	return base64.URLEncoding.EncodeToString(bytes), nil
 }

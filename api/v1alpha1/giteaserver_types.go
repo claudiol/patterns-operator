@@ -20,32 +20,25 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // GiteaServerSpec defines the desired state of GiteaServer
 type GiteaServerSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	// Helm Chart URL. Default value: https://charts.validatedpatterns.io
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=1
 	HelmChartUrl string `json:"helmChartUrl,omitempty"`
-	// Namespace where helm chart will be deployed to. Default: gitea
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=2
-	Namespace string `json:"namespace,omitempty"`
 	// Helm Repo name. Default: helm-charts
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=3
-	RepoName string `json:"repoName,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=2
+	HelmRepoName string `json:"repoName,omitempty"`
 	// Chart Name that we will deploy. Default: gitea-chart
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=4
-	ChartName string `json:"chartName,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=3
+	HelmChartName string `json:"chartName,omitempty"`
 	// Version for the chart. Default: 0.0.3
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=5
-	Version string `json:"version,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=4
+	HelmChartVersion string `json:"version,omitempty"`
 	// Release name used to deploy the chart.  Default: gitea
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=6
-	ReleaseName string `json:"releaseName,omitempty"`
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,order=5
+	HelmReleaseName string `json:"releaseName,omitempty"`
 }
 
 const (
